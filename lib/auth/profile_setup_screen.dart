@@ -1,7 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import '../screens/home_screen.dart';
 
 class ProfileSetupScreen extends StatefulWidget {
   const ProfileSetupScreen({super.key});
@@ -38,13 +37,11 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
         'createdAt': FieldValue.serverTimestamp(),
       }, SetOptions(merge: true));
 
-      if (mounted) {
-        Navigator.pop(context); // go back to AuthGate
-
-      }
-      // back to AuthGate -> Home
+      if (mounted) Navigator.pop(context);
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(e.toString())),
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -60,51 +57,175 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final tt = Theme.of(context).textTheme;
+    final size = MediaQuery.of(context).size;
     final phone = FirebaseAuth.instance.currentUser?.phoneNumber ?? '';
+
     return Scaffold(
-      appBar: AppBar(title: const Text('Profile Setup')),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          children: [
-            Text('Phone: $phone', style: const TextStyle(color: Colors.grey)),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _ownerCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Owner Name *',
-                border: OutlineInputBorder(),
-              ),
+      body: SafeArea(
+        child: Container(
+          height: size.height,
+          decoration: BoxDecoration(
+            gradient: LinearGradient(
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+              colors: [
+                cs.primaryContainer.withOpacity(.3),
+                cs.surface,
+                cs.surface,
+              ],
+              stops: const [0, .45, 1],
             ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _companyCtrl,
-              decoration: const InputDecoration(
-                labelText: 'Company Name *',
-                border: OutlineInputBorder(),
+          ),
+          child: Column(
+            children: [
+              // HERO TOP
+              Expanded(
+                flex: 2,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(32, 4, 32, 0),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(24),
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          color: cs.primary.withOpacity(.12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: cs.primary.withOpacity(.2),
+                              blurRadius: 30,
+                              offset: const Offset(0, 10),
+                            )
+                          ],
+                        ),
+                        child: Icon(
+                          Icons.person_rounded,
+                          size: 64,
+                          color: cs.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 20),
+
+                      Text(
+                        "Profile Setup",
+                        style: tt.headlineMedium?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          color: cs.primary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      Text(
+                        "Phone: $phone",
+                        style: tt.bodyMedium?.copyWith(
+                          color: cs.onSurfaceVariant,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 12),
-            TextField(
-              controller: _emailCtrl,
-              keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(
-                labelText: 'Email (optional)',
-                border: OutlineInputBorder(),
+
+              // FORM CARD + scroll
+              Expanded(
+                flex: 3,
+                child: Container(
+                  width: double.infinity,
+                  decoration: BoxDecoration(
+                    color: cs.surface,
+                    borderRadius: const BorderRadius.vertical(
+                      top: Radius.circular(32),
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(.05),
+                        blurRadius: 20,
+                        offset: const Offset(0, -5),
+                      )
+                    ],
+                  ),
+                  child: SingleChildScrollView(
+                    padding: const EdgeInsets.fromLTRB(32, 32, 32, 24),
+                    child: Column(
+                      children: [
+                        _input(tt, cs, "Owner Name *", _ownerCtrl),
+                        const SizedBox(height: 16),
+                        _input(tt, cs, "Company Name *", _companyCtrl),
+                        const SizedBox(height: 16),
+                        _input(tt, cs, "Email (optional)", _emailCtrl, emailMode: true),
+                        const SizedBox(height: 28),
+
+                        SizedBox(
+                          width: double.infinity,
+                          height: 56,
+                          child: FilledButton.icon(
+                            onPressed: _busy ? null : _save,
+                            icon: _busy
+                                ? SizedBox(
+                                    width: 20,
+                                    height: 20,
+                                    child: CircularProgressIndicator(
+                                      strokeWidth: 2,
+                                      valueColor:
+                                          AlwaysStoppedAnimation(cs.onPrimary),
+                                    ),
+                                  )
+                                : const Icon(Icons.check_rounded),
+                            label: Text(
+                              _busy ? "Saving…" : "Save & Continue",
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                    ),
+                  ),
+                ),
               ),
-            ),
-            const SizedBox(height: 16),
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton.icon(
-                onPressed: _busy ? null : _save,
-                icon: const Icon(Icons.save),
-                label: Text(_busy ? 'Saving…' : 'Save & Continue'),
-              ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
+    );
+  }
+
+  Widget _input(TextTheme tt, ColorScheme cs, String label,
+      TextEditingController ctrl,
+      {bool emailMode = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(label,
+            style: tt.labelLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+            )),
+        const SizedBox(height: 10),
+        Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(16),
+            border: Border.all(
+              color: cs.outline.withOpacity(.3),
+            ),
+          ),
+          child: TextField(
+            controller: ctrl,
+            keyboardType:
+                emailMode ? TextInputType.emailAddress : TextInputType.text,
+            decoration: const InputDecoration(
+              contentPadding: EdgeInsets.symmetric(horizontal: 20, vertical: 18),
+              border: InputBorder.none,
+            ),
+          ),
+        ),
+      ],
     );
   }
 }
