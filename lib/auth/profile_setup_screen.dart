@@ -39,11 +39,8 @@ class _ProfileSetupScreenState extends State<ProfileSetupScreen> {
       }, SetOptions(merge: true));
 
       if (mounted) {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (_) => const HomeScreen()),
-              (_) => false,
-        );
+        Navigator.pop(context); // go back to AuthGate
+
       }
       // back to AuthGate -> Home
     } catch (e) {
