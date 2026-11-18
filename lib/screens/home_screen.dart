@@ -6,6 +6,8 @@ import '../services/firestore_service.dart';
 import '../models/truck_model.dart';
 import 'truck_details_screen.dart';
 import 'add_truck_screen.dart';
+import 'memo_list_screen.dart';
+import 'quote_list_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -138,6 +140,34 @@ class HomeScreen extends StatelessWidget {
                     const SizedBox(height: 24),
                     const Divider(),
                     const SizedBox(height: 16),
+                    FilledButton.tonalIcon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const MemoListScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.receipt_long_rounded),
+                      label: const Text('Memos'),
+                    ),
+                    const SizedBox(height: 12),
+                    FilledButton.tonalIcon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => const QuoteListScreen(),
+                          ),
+                        );
+                      },
+                      icon: const Icon(Icons.request_quote_rounded),
+                      label: const Text('Quotations'),
+                    ),
+                    const SizedBox(height: 12),
                     FilledButton.icon(
                       onPressed: () async {
                         await FirebaseAuth.instance.signOut();
@@ -186,6 +216,30 @@ class HomeScreen extends StatelessWidget {
             ),
           ),
         ),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(top: 24, right: 8),
+            child: IconButton.filledTonal(
+              tooltip: 'Quotations',
+              icon: const Icon(Icons.request_quote_rounded),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const QuoteListScreen()),
+              ),
+            ),
+          ),
+          Padding(
+            padding: const EdgeInsets.only(top: 24, right: 12),
+            child: IconButton.filledTonal(
+              tooltip: 'Memos',
+              icon: const Icon(Icons.receipt_long_rounded),
+              onPressed: () => Navigator.push(
+                context,
+                MaterialPageRoute(builder: (_) => const MemoListScreen()),
+              ),
+            ),
+          ),
+        ],
         leadingWidth: 74,
         leading: Builder(
           builder: (ctx) =>
